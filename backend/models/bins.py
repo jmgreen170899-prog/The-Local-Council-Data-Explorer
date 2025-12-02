@@ -4,7 +4,7 @@ Bins models module.
 This module contains Pydantic models for bin collection data.
 """
 
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel
 

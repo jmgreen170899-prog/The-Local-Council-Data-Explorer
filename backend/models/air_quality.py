@@ -4,7 +4,7 @@ Air quality models module.
 This module contains Pydantic models for air quality data.
 """
 
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel
 

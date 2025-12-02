@@ -4,7 +4,7 @@ Planning models module.
 This module contains Pydantic models for planning application data.
 """
 
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel
 

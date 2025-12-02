@@ -25,8 +25,8 @@ export function AirQualityPanel({ data }: AirQualityPanelProps): React.ReactElem
       </p>
       <h3>Pollutants</h3>
       <ul>
-        {data.pollutants.map((pollutant, index) => (
-          <li key={index}>
+        {data.pollutants.map((pollutant) => (
+          <li key={pollutant.name}>
             {pollutant.name}: {pollutant.value} {pollutant.units}
           </li>
         ))}

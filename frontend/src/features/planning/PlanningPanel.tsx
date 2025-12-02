@@ -21,8 +21,8 @@ export function PlanningPanel({ data }: PlanningPanelProps): React.ReactElement 
       <h2>Planning Applications</h2>
       <p>Local Planning Authority: {data.lpa}</p>
       <ul>
-        {data.applications.map((app, index) => (
-          <li key={index}>
+        {data.applications.map((app) => (
+          <li key={app.reference}>
             <strong>{app.reference}</strong>: {app.proposal}
             <br />
             Address: {app.address}

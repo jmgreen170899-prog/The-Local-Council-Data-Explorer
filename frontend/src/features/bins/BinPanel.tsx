@@ -22,8 +22,8 @@ export function BinPanel({ data }: BinPanelProps): React.ReactElement {
       <p>Address: {data.address}</p>
       <p>Council: {data.council}</p>
       <ul>
-        {data.bins.map((bin, index) => (
-          <li key={index}>
+        {data.bins.map((bin) => (
+          <li key={`${bin.type}-${bin.collection_date}`}>
             {bin.type}: {bin.collection_date}
           </li>
         ))}
