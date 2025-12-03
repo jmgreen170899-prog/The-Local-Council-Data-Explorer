@@ -17,7 +17,7 @@ from services.air_service import AirQualityService, get_air_quality_service
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(prefix="/air-quality")
 
 
 def get_service(
@@ -35,7 +35,7 @@ def get_service(
 
 
 @router.get(
-    "/",
+    "",
     response_model=AirQualityResponse,
     responses={
         500: {"model": ErrorResponse, "description": "Internal Server Error"},

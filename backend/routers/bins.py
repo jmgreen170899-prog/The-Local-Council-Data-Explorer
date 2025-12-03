@@ -17,7 +17,7 @@ from services.bins_service import BinsService, get_bins_service
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(prefix="/bins")
 
 
 def get_service(settings: Annotated[Settings, Depends(get_settings)]) -> BinsService:
@@ -33,7 +33,7 @@ def get_service(settings: Annotated[Settings, Depends(get_settings)]) -> BinsSer
 
 
 @router.get(
-    "/",
+    "",
     response_model=BinCollectionResponse,
     responses={
         400: {"model": ErrorResponse, "description": "Bad Request"},
