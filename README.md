@@ -2,6 +2,15 @@
 
 **A full-stack application for visualizing UK local council data, including bin collection schedules, planning applications, and real-time air quality information.**
 
+<!-- Quality Badges -->
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-3776AB.svg)](https://www.python.org/)
+[![Node.js 20+](https://img.shields.io/badge/Node.js-20+-339933.svg)](https://nodejs.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](./docker-compose.yml)
+[![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Linting: Ruff](https://img.shields.io/badge/linting-ruff-261230.svg)](https://docs.astral.sh/ruff/)
+
+<!-- Technology Badges -->
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -355,14 +364,27 @@ npm run lint
 
 ## 📖 Documentation
 
+### Technical Documentation
+
 | Document | Description |
 |----------|-------------|
-| [ARCHITECTURE.md](./Architecture.md) | Detailed system architecture and design decisions |
-| [SYSTEM_FLOW.md](./SYSTEM_FLOW.md) | Sequence diagrams and data flow documentation |
+| [docs/ARCHITECTURE_OVERVIEW.md](./docs/ARCHITECTURE_OVERVIEW.md) | System architecture and design patterns |
+| [docs/BACKEND_STRUCTURE.md](./docs/BACKEND_STRUCTURE.md) | Backend module organization and patterns |
+| [docs/FRONTEND_STRUCTURE.md](./docs/FRONTEND_STRUCTURE.md) | Frontend component architecture |
+| [docs/DEPLOYMENT_GUIDE.md](./docs/DEPLOYMENT_GUIDE.md) | Production deployment instructions |
+| [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md) | Common issues and solutions |
+| [docs/CONTRIBUTING_GUIDE.md](./docs/CONTRIBUTING_GUIDE.md) | Contribution guidelines |
+
+### Reference Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Architecture.md](./Architecture.md) | Detailed system architecture |
+| [SYSTEM_FLOW.md](./SYSTEM_FLOW.md) | Sequence diagrams and data flow |
 | [API_REFERENCE.md](./API_REFERENCE.md) | Complete API endpoint reference |
 | [SETUP.md](./SETUP.md) | Installation and setup guide |
-| [PORTFOLIO_NOTES.md](./PORTFOLIO_NOTES.md) | Talking points for recruiters and interviews |
-| [docs/SCREENSHOTS.md](./docs/SCREENSHOTS.md) | Screenshot capture guide |
+| [PORTFOLIO_NOTES.md](./PORTFOLIO_NOTES.md) | Interview talking points |
+| [docs/SYSTEM_VERIFICATION_OPTION_A.md](./docs/SYSTEM_VERIFICATION_OPTION_A.md) | System integrity verification |
 
 ### Portfolio Resources
 
