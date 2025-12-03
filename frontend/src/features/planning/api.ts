@@ -4,7 +4,8 @@
 
 import type { PlanningResponse, ApiError } from "./types";
 
-const API_BASE = "/api/planning";
+// Falls back to relative URL for local dev (uses vite proxy) or nginx proxy
+const API_BASE = `${import.meta.env.VITE_API_BASE_URL || ''}/api/planning`;
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
 
