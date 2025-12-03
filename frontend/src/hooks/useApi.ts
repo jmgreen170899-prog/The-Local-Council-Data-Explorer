@@ -44,6 +44,7 @@ export function useApi<T>(
           : (err as { message?: string }).message ?? "An error occurred";
       setState((prev) => ({ ...prev, loading: false, error: message }));
     }
+    // Spread deps is intentional for dynamic dependency support
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetcher, ...deps]);
 
@@ -55,8 +56,9 @@ export function useApi<T>(
     if (immediate) {
       execute();
     }
+    // Spread deps is intentional for dynamic dependency support
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [immediate, ...deps]);
+  }, [immediate, execute, ...deps]);
 
   return {
     ...state,
