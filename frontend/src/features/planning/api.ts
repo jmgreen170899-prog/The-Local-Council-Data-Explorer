@@ -2,26 +2,61 @@
  * API functions for the planning feature.
  */
 
-import type { PlanningResponse } from "./types";
+import type { PlanningResponse, ApiError } from "./types";
 
 const API_BASE = "/api/planning";
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
+
+async function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 /**
  * Fetch planning applications for a given local planning authority.
+ * Includes retry logic for transient failures.
  */
 export async function fetchPlanningApplications(
-  lpa: string = "",
+  lpa: string,
   dateFrom: string = "",
   dateTo: string = ""
 ): Promise<PlanningResponse> {
   const params = new URLSearchParams();
-  if (lpa) params.append("lpa", lpa);
+  params.append("lpa", lpa);
   if (dateFrom) params.append("date_from", dateFrom);
   if (dateTo) params.append("date_to", dateTo);
 
-  const response = await fetch(`${API_BASE}?${params.toString()}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch planning applications");
+  let lastError: ApiError = { message: "Unknown error" };
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const response = await fetch(`${API_BASE}?${params.toString()}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = (errorData as { detail?: string }).detail || `HTTP error ${response.status}`;
+        
+        if (response.status >= 500 && attempt < MAX_RETRIES - 1) {
+          await delay(RETRY_DELAY_MS * (attempt + 1));
+          continue;
+        }
+        
+        throw { message: errorMessage, status: response.status } as ApiError;
+      }
+      
+      return response.json() as Promise<PlanningResponse>;
+    } catch (error) {
+      if ((error as ApiError).status !== undefined) {
+        throw error;
+      }
+      
+      lastError = { message: error instanceof Error ? error.message : "Network error" };
+      
+      if (attempt < MAX_RETRIES - 1) {
+        await delay(RETRY_DELAY_MS * (attempt + 1));
+      }
+    }
   }
-  return response.json();
+
+  throw lastError;
 }
