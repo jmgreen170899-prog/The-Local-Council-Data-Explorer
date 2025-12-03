@@ -21,8 +21,3 @@ export interface AirQualityResponse {
 export interface AirQualityRequest {
   area?: string;
 }
-
-export interface ApiError {
-  message: string;
-  status?: number;
-}
