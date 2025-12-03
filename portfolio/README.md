@@ -111,7 +111,7 @@ local-council-data-explorer/
 
 | Metric | Value |
 |--------|-------|
-| Backend Tests | 66 passing |
+| Backend Tests | 84 passing |
 | Frontend Linting | ✅ Clean |
 | Code Coverage | ~60% |
 | Build Time | <1 second (Vite) |
