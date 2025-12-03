@@ -1,4 +1,4 @@
-# POST–OPTION-A SYSTEM INTEGRITY VERIFICATION + RESIDUAL FAILURE SCAN
+# POST-OPTION-A SYSTEM INTEGRITY VERIFICATION + RESIDUAL FAILURE SCAN
 
 **Document Date:** 2025-12-03  
 **Verification Status:** SYSTEM VERIFIED ✅
@@ -205,11 +205,14 @@ location /api/ {
 
 **API_BASE in minified bundle:**
 ```javascript
+// XN = API_BASE constant (minified from "API_BASE" in client.ts)
 const XN=`/api`
 ```
 
 **Endpoint construction (extracted from bundle):**
 ```javascript
+// XN = API_BASE, r/t = URLSearchParams (minified variable names)
+// Original: fetch(`${API_BASE}/bins?${params.toString()}`)
 fetch(`${XN}/bins?${r.toString()}`)
 fetch(`${XN}/planning?${r.toString()}`)
 fetch(`${XN}/air-quality?${t.toString()}`)
@@ -275,11 +278,17 @@ fetch(`${XN}/air-quality?${t.toString()}`)
 | `/api/bins` | No redirect, returns 400 (missing postcode/uprn) | ✅ Expected |
 | `/api/bins/` | 307 redirect to `/api/bins` | ✅ Allowed |
 | `/api/bins?postcode=YO1` | No redirect, returns 200 | ✅ Correct |
-| `/api/planning` | 422 Unprocessable Entity (missing required lpa) | ✅ Expected |
+| `/api/planning` | 422 Unprocessable Entity (missing required lpa)* | ✅ Expected |
 | `/api/planning/` | 307 redirect to `/api/planning` | ✅ Allowed |
 | `/api/planning?lpa=York` | No redirect, returns 200 | ✅ Correct |
 | `/api/air-quality` | No redirect, returns 200 (area optional) | ✅ Correct |
 | `/api/air-quality/` | 307 redirect to `/api/air-quality` | ✅ Allowed |
+
+> *Note: The difference between 400 (bins) and 422 (planning) reflects FastAPI's validation behavior:
+> - 400 Bad Request: Custom validation in endpoint handler (bins checks if postcode OR uprn provided)
+> - 422 Unprocessable Entity: FastAPI's automatic validation for required query parameters (lpa is required)
+> 
+> Both are valid HTTP error responses for validation failures.
 
 ---
 
