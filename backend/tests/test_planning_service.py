@@ -23,7 +23,7 @@ class TestPlanningService:
     async def test_get_planning_applications_returns_mock_data(self):
         """Test that mock mode returns mock data."""
         result = await self.service.get_planning_applications(lpa="York")
-        
+
         assert isinstance(result, PlanningResponse)
         assert "York" in result.lpa
         assert len(result.applications) > 0
@@ -33,15 +33,14 @@ class TestPlanningService:
     async def test_get_planning_applications_with_date_filter(self):
         """Test filtering applications by date."""
         result = await self.service.get_planning_applications(
-            lpa="York",
-            date_from="2025-10-01",
-            date_to="2025-11-30"
+            lpa="York", date_from="2025-10-01", date_to="2025-11-30"
         )
-        
+
         assert isinstance(result, PlanningResponse)
         # All applications should be within date range
         # Use datetime parsing for proper date comparison
         from datetime import datetime
+
         date_from_dt = datetime.strptime("2025-10-01", "%Y-%m-%d")
         date_to_dt = datetime.strptime("2025-11-30", "%Y-%m-%d")
         for app in result.applications:
@@ -60,10 +59,10 @@ class TestPlanningService:
         """Test that results are cached."""
         # First call
         result1 = await self.service.get_planning_applications(lpa="York")
-        
+
         # Second call should return cached data
         result2 = await self.service.get_planning_applications(lpa="York")
-        
+
         # Should be the same object from cache
         assert result1 == result2
         assert self.cache.size() == 1
@@ -71,9 +70,9 @@ class TestPlanningService:
     @pytest.mark.asyncio
     async def test_get_planning_applications_different_lpas(self):
         """Test that different LPAs get different cache entries."""
-        result1 = await self.service.get_planning_applications(lpa="York")
-        result2 = await self.service.get_planning_applications(lpa="Manchester")
-        
+        await self.service.get_planning_applications(lpa="York")
+        await self.service.get_planning_applications(lpa="Manchester")
+
         # Should have two cache entries
         assert self.cache.size() == 2
 
@@ -155,9 +154,9 @@ class TestPlanningServiceNormalization:
                 received_date="2025-11-01",
             ),
         ]
-        
+
         sorted_apps = self.service._sort_applications_by_date(apps)
-        
+
         assert sorted_apps[0].received_date == "2025-12-01"  # Most recent first
         assert sorted_apps[1].received_date == "2025-11-01"
         assert sorted_apps[2].received_date == "2025-10-01"
@@ -189,9 +188,9 @@ class TestPlanningServiceTransformation:
                 },
             ]
         }
-        
+
         result = self.service._transform_planning_api_response(data, "York")
-        
+
         assert result.lpa == "York"
         assert len(result.applications) == 2
         assert result.applications[0].reference == "23/12345/FUL"
@@ -208,9 +207,9 @@ class TestPlanningServiceTransformation:
             "applicant-name": "John Smith",
             "planning-application-type": "Full Application",
         }
-        
+
         result = self.service._parse_entity(entity)
-        
+
         assert result is not None
         assert result.reference == "23/12345/FUL"
         assert result.address == "10 Example Street, York"
@@ -225,15 +224,15 @@ class TestPlanningServiceTransformation:
             "address": "10 Example Street",
             "entry-date": "2025-11-10",
         }
-        
+
         result = self.service._parse_entity(entity)
-        
+
         assert result is None
 
     def test_create_fallback_response(self):
         """Test fallback response creation."""
         result = self.service._create_fallback_response("York")
-        
+
         assert result.lpa == "York"
         assert result.applications == []
         assert result.total_count == 0

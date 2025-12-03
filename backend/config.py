@@ -62,7 +62,7 @@ class Settings(BaseSettings):
 
 def get_settings() -> Settings:
     """Get application settings instance.
-    
+
     Returns:
         Settings instance, can be used as a FastAPI dependency.
     """

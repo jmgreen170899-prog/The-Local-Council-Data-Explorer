@@ -111,10 +111,10 @@ STATUS_MAPPING: Dict[str, str] = {
 
 class PlanningService:
     """Service for retrieving planning application data from planning.data.gov.uk.
-    
+
     This service wraps the planning.data.gov.uk API and transforms the response
     into our internal data model.
-    
+
     Attributes:
         settings: Application settings instance.
         base_url: Base URL for the planning.data.gov.uk API.
@@ -124,7 +124,7 @@ class PlanningService:
 
     def __init__(self, settings: Settings, cache: Optional[InMemoryCache] = None):
         """Initialize the planning service.
-        
+
         Args:
             settings: Application settings instance.
             cache: Optional cache instance. If not provided, uses global cache.
@@ -144,7 +144,7 @@ class PlanningService:
         date_to: Optional[str] = None,
     ) -> PlanningResponse:
         """Retrieve planning applications for a given local planning authority.
-        
+
         This method first checks the cache for existing data. If not found,
         it fetches from the planning.data.gov.uk API and caches the result.
 
@@ -167,7 +167,7 @@ class PlanningService:
         cache_key = self.cache.generate_key(
             "planning", lpa=lpa, date_from=date_from, date_to=date_to
         )
-        
+
         # Check cache first
         cached = self.cache.get(cache_key)
         if cached is not None:
@@ -178,7 +178,7 @@ class PlanningService:
             result = self._get_mock_data(lpa, date_from, date_to)
         else:
             result = await self._fetch_from_api(lpa, date_from, date_to)
-        
+
         # Cache the result
         self.cache.set(cache_key, result, ttl=self.settings.CACHE_TTL_PLANNING)
         return result
@@ -272,10 +272,10 @@ class PlanningService:
         date_to: Optional[str] = None,
     ) -> PlanningResponse:
         """Fetch planning application data from planning.data.gov.uk API.
-        
+
         The API endpoint format is:
         GET https://www.planning.data.gov.uk/entity.json
-        
+
         Query parameters:
         - dataset: planning-application
         - organisation_entity: LPA entity ID (or use search)
@@ -297,7 +297,7 @@ class PlanningService:
             "dataset": "planning-application",
             "limit": 100,  # Limit results
         }
-        
+
         # Add date filters if provided
         if date_from:
             try:
@@ -308,9 +308,9 @@ class PlanningService:
                 params["entry_date_match"] = "after"
             except ValueError:
                 logger.warning(f"Invalid date_from format: {date_from}")
-        
+
         url = f"{self.base_url}/entity.json"
-        
+
         logger.info(f"Fetching planning data from: {url} with params: {params}")
 
         try:
@@ -320,7 +320,7 @@ class PlanningService:
                 data = response.json()
 
             return self._transform_planning_api_response(data, lpa, date_from, date_to)
-            
+
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error from planning.data.gov.uk: {e}")
             # Return empty response on error
@@ -337,7 +337,7 @@ class PlanningService:
         date_to: Optional[str] = None,
     ) -> PlanningResponse:
         """Transform planning.data.gov.uk API response into internal model.
-        
+
         The planning.data.gov.uk API returns data in the following structure:
         {
             "entities": [
@@ -366,31 +366,31 @@ class PlanningService:
             Normalized PlanningResponse.
         """
         applications: List[PlanningApplication] = []
-        
+
         # Handle different response formats
         if isinstance(data, dict):
             # Extract entities array
             entities = data.get("entities", [])
-            
+
             for entity in entities:
                 app = self._parse_entity(entity)
                 if app:
                     applications.append(app)
-            
+
         elif isinstance(data, list):
             # If response is directly a list of entities
             for entity in data:
                 app = self._parse_entity(entity)
                 if app:
                     applications.append(app)
-        
+
         # Apply date filters to the transformed data
         if date_from or date_to:
             applications = self._filter_by_date(applications, date_from, date_to)
-        
+
         # Sort by received date, most recent first
         applications = self._sort_applications_by_date(applications)
-        
+
         return PlanningResponse(
             lpa=lpa,
             applications=applications,
@@ -399,7 +399,7 @@ class PlanningService:
 
     def _parse_entity(self, entity: Dict[str, Any]) -> Optional[PlanningApplication]:
         """Parse a single entity from planning.data.gov.uk into PlanningApplication.
-        
+
         Handles the entity format from the API and extracts relevant fields.
 
         Args:
@@ -411,20 +411,20 @@ class PlanningService:
         # Skip if entity is empty or not a dict
         if not entity or not isinstance(entity, dict):
             return None
-        
+
         # Extract reference - required field
         reference = (
             entity.get("reference")
             or entity.get("planning-application-reference")
             or entity.get("name", "")
         )
-        
+
         if not reference:
             return None
-        
+
         # Extract address from name or geometry
         address = self._extract_address(entity)
-        
+
         # Extract proposal/description
         proposal = (
             entity.get("description")
@@ -432,11 +432,11 @@ class PlanningService:
             or entity.get("notes")
             or "Planning application"
         )
-        
+
         # Extract and normalize status
         raw_status = entity.get("planning-decision", "")
         status = self._normalize_status(raw_status)
-        
+
         # Extract dates
         received_date = self._normalize_date(
             entity.get("entry-date")
@@ -444,24 +444,24 @@ class PlanningService:
             or entity.get("received-date")
             or ""
         )
-        
+
         decision_date = self._normalize_date(
             entity.get("decision-date") or entity.get("end-date") or ""
         )
-        
+
         # Extract decision outcome
         decision = entity.get("planning-decision") or None
-        
+
         # Extract applicant if available
         applicant_name = entity.get("applicant-name") or None
-        
+
         # Extract application type
         application_type = (
             entity.get("planning-application-type")
             or entity.get("development-type")
             or None
         )
-        
+
         return PlanningApplication(
             reference=reference,
             address=address,
@@ -476,7 +476,7 @@ class PlanningService:
 
     def _extract_address(self, entity: Dict[str, Any]) -> str:
         """Extract address from entity data.
-        
+
         Tries multiple field names and falls back to coordinates if needed.
 
         Args:
@@ -491,10 +491,10 @@ class PlanningService:
             or entity.get("site-address")
             or entity.get("address-text")
         )
-        
+
         if address:
             return str(address)
-        
+
         # Try to construct from name
         name = entity.get("name", "")
         if name and "at" in name.lower():
@@ -502,7 +502,7 @@ class PlanningService:
             parts = name.lower().split(" at ", 1)
             if len(parts) > 1:
                 return parts[1].title()
-        
+
         # Fall back to name or reference
         return name or entity.get("reference", "Unknown Address")
 
@@ -517,12 +517,12 @@ class PlanningService:
         """
         if not status:
             return "Pending"
-        
+
         lower_status = status.lower().strip()
-        
+
         if lower_status in STATUS_MAPPING:
             return STATUS_MAPPING[lower_status]
-        
+
         # Return title case of original
         return status.title()
 
@@ -537,9 +537,9 @@ class PlanningService:
         """
         if not date_str:
             return ""
-        
+
         date_str = str(date_str).strip()
-        
+
         # Try different date formats
         formats = [
             "%Y-%m-%d",
@@ -549,14 +549,14 @@ class PlanningService:
             "%d/%m/%Y",
             "%d-%m-%Y",
         ]
-        
+
         for fmt in formats:
             try:
                 parsed = datetime.strptime(date_str, fmt)
                 return parsed.strftime("%Y-%m-%d")
             except ValueError:
                 continue
-        
+
         logger.warning(f"Could not parse date: {date_str}")
         return date_str
 
@@ -571,6 +571,7 @@ class PlanningService:
         Returns:
             Sorted list of applications.
         """
+
         def parse_date(app: PlanningApplication) -> datetime:
             try:
                 return datetime.strptime(app.received_date, "%Y-%m-%d")
@@ -597,10 +598,10 @@ class PlanningService:
 
 def get_planning_service(settings: Settings = None) -> PlanningService:
     """Factory function to create PlanningService instance.
-    
+
     Args:
         settings: Optional settings instance. If not provided, uses default settings.
-    
+
     Returns:
         PlanningService instance.
     """

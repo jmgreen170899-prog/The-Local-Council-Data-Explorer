@@ -23,7 +23,7 @@ class TestBinsService:
     async def test_get_bin_collections_returns_mock_data(self):
         """Test that mock mode returns mock data."""
         result = await self.service.get_bin_collections(postcode="YO1 1AA")
-        
+
         assert isinstance(result, BinCollectionResponse)
         assert result.council == "City of York Council"
         assert len(result.bins) > 0
@@ -33,17 +33,16 @@ class TestBinsService:
     async def test_get_bin_collections_with_house_number(self):
         """Test that house number is included in address."""
         result = await self.service.get_bin_collections(
-            postcode="YO1 1AA",
-            house_number="42"
+            postcode="YO1 1AA", house_number="42"
         )
-        
+
         assert "42" in result.address
 
     @pytest.mark.asyncio
     async def test_get_bin_collections_with_uprn(self):
         """Test getting bin collections with UPRN."""
         result = await self.service.get_bin_collections(uprn="100050535540")
-        
+
         assert isinstance(result, BinCollectionResponse)
         assert result.council == "City of York Council"
 
@@ -52,10 +51,10 @@ class TestBinsService:
         """Test that results are cached."""
         # First call
         result1 = await self.service.get_bin_collections(postcode="YO1 1AA")
-        
+
         # Second call should return cached data
         result2 = await self.service.get_bin_collections(postcode="YO1 1AA")
-        
+
         # Should be the same object from cache
         assert result1 == result2
         assert self.cache.size() == 1
@@ -63,9 +62,9 @@ class TestBinsService:
     @pytest.mark.asyncio
     async def test_get_bin_collections_with_different_postcodes(self):
         """Test that different postcodes get different cache entries."""
-        result1 = await self.service.get_bin_collections(postcode="SW1A 1AA")
-        result2 = await self.service.get_bin_collections(postcode="M1 1AA")
-        
+        await self.service.get_bin_collections(postcode="SW1A 1AA")
+        await self.service.get_bin_collections(postcode="M1 1AA")
+
         # Should have two cache entries
         assert self.cache.size() == 2
 
@@ -118,9 +117,9 @@ class TestBinsServiceNormalization:
             BinCollection(type="Recycling", collection_date="2025-12-09"),
             BinCollection(type="Garden", collection_date="2025-12-12"),
         ]
-        
+
         sorted_bins = self.service._sort_bins_by_date(bins)
-        
+
         assert sorted_bins[0].collection_date == "2025-12-09"
         assert sorted_bins[1].collection_date == "2025-12-12"
         assert sorted_bins[2].collection_date == "2025-12-15"
@@ -139,19 +138,13 @@ class TestBinsServiceTransformation:
         data = {
             "address": "10 Example Street, York",
             "bins": [
-                {
-                    "binType": "GREY BIN",
-                    "nextCollectionDate": "2025-12-09T00:00:00"
-                },
-                {
-                    "binType": "GREEN BIN",
-                    "nextCollectionDate": "2025-12-16T00:00:00"
-                },
-            ]
+                {"binType": "GREY BIN", "nextCollectionDate": "2025-12-09T00:00:00"},
+                {"binType": "GREEN BIN", "nextCollectionDate": "2025-12-16T00:00:00"},
+            ],
         }
-        
+
         result = self.service._transform_york_api_response(data, "100050535540")
-        
+
         assert result.address == "10 Example Street, York"
         assert result.council == "City of York Council"
         assert len(result.bins) == 2
@@ -163,19 +156,13 @@ class TestBinsServiceTransformation:
         data = {
             "address": "10 Example Street, York",
             "services": [
-                {
-                    "service": "REFUSE",
-                    "nextCollection": "2025-12-09T00:00:00"
-                },
-                {
-                    "service": "RECYCLING",
-                    "nextCollection": "2025-12-16T00:00:00"
-                },
-            ]
+                {"service": "REFUSE", "nextCollection": "2025-12-09T00:00:00"},
+                {"service": "RECYCLING", "nextCollection": "2025-12-16T00:00:00"},
+            ],
         }
-        
+
         result = self.service._transform_york_api_response(data, "100050535540")
-        
+
         assert result.address == "10 Example Street, York"
         assert len(result.bins) == 2
         assert result.bins[0].type == "Refuse"
@@ -183,10 +170,9 @@ class TestBinsServiceTransformation:
     def test_create_fallback_response(self):
         """Test fallback response creation."""
         result = self.service._create_fallback_response(
-            postcode="YO1 1AA",
-            house_number="10"
+            postcode="YO1 1AA", house_number="10"
         )
-        
+
         assert "10" in result.address
         assert "YO1 1AA" in result.address
         assert result.council == "City of York Council"
