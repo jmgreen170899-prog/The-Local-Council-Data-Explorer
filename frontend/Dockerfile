@@ -19,7 +19,10 @@ RUN npm ci
 COPY . .
 
 # Build argument for API URL
-ARG VITE_API_BASE_URL=http://localhost:8000
+# Default is empty so the frontend uses relative /api/... paths.
+# nginx proxies these to the backend container.
+# DO NOT set to Docker-internal hostnames - browsers cannot resolve them.
+ARG VITE_API_BASE_URL=
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 # Build the application
