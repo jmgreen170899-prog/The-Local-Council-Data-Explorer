@@ -29,7 +29,7 @@ export async function fetchPlanningApplications(
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const response = await fetch(`${API_BASE}/api/planning?${params.toString()}`);
+      const response = await fetch(`${API_BASE}/planning?${params.toString()}`);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

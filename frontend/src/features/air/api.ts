@@ -25,7 +25,7 @@ export async function fetchAirQuality(
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const response = await fetch(`${API_BASE}/api/air-quality?${params.toString()}`);
+      const response = await fetch(`${API_BASE}/air-quality?${params.toString()}`);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
