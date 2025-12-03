@@ -52,14 +52,14 @@ async def get_planning(
         str,
         Query(
             description="Local Planning Authority name or identifier",
-            example="City of York Council",
+            examples=["City of York Council"],
         ),
     ],
     date_from: Annotated[
         Optional[str],
         Query(
             description="Start date for filtering applications (YYYY-MM-DD)",
-            example="2025-01-01",
+            examples=["2025-01-01"],
             pattern=r"^\d{4}-\d{2}-\d{2}$",
         ),
     ] = None,
@@ -67,7 +67,7 @@ async def get_planning(
         Optional[str],
         Query(
             description="End date for filtering applications (YYYY-MM-DD)",
-            example="2025-12-31",
+            examples=["2025-12-31"],
             pattern=r"^\d{4}-\d{2}-\d{2}$",
         ),
     ] = None,

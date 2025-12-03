@@ -50,21 +50,21 @@ async def get_bins(
         Optional[str],
         Query(
             description="UK postcode for the property",
-            example="YO1 1AA",
+            examples=["YO1 1AA"],
         ),
     ] = None,
     house_number: Annotated[
         Optional[str],
         Query(
             description="House number or name",
-            example="10",
+            examples=["10"],
         ),
     ] = None,
     uprn: Annotated[
         Optional[str],
         Query(
             description="Unique Property Reference Number",
-            example="100070123456",
+            examples=["100070123456"],
         ),
     ] = None,
 ) -> BinCollectionResponse:

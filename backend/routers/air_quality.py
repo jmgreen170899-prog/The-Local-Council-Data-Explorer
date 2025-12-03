@@ -51,7 +51,7 @@ async def get_air_quality(
         Optional[str],
         Query(
             description="Geographic area or region to query",
-            example="Greater London",
+            examples=["Greater London"],
         ),
     ] = None,
 ) -> AirQualityResponse:

@@ -1,0 +1,63 @@
+# ====================================
+# Docker Compose Configuration
+# Local Council Data Explorer
+# ====================================
+#
+# Usage:
+#   Development: docker-compose up -d
+#   Production:  docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#   Logs:        docker-compose logs -f
+#   Stop:        docker-compose down
+#
+
+services:
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: council-explorer-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=false
+      - MOCK_MODE=true
+      - CACHE_TTL_BINS=3600
+      - CACHE_TTL_PLANNING=1800
+      - CACHE_TTL_AIR_QUALITY=600
+    env_file:
+      - ./backend/.env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - council-network
+
+  # Frontend Web Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://localhost:8000
+    container_name: council-explorer-web
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - council-network
+
+networks:
+  council-network:
+    driver: bridge
+
+# Optional: Add volumes for persistent data in the future
+# volumes:
+#   db-data:
