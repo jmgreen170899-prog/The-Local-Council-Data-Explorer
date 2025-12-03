@@ -96,10 +96,10 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(bins.router, prefix="/api/bins", tags=["Bin Collections"])
-app.include_router(planning.router, prefix="/api/planning", tags=["Planning Applications"])
+app.include_router(bins.router, prefix="/api", tags=["Bin Collections"])
+app.include_router(planning.router, prefix="/api", tags=["Planning Applications"])
 app.include_router(
-    air_quality.router, prefix="/api/air-quality", tags=["Air Quality"]
+    air_quality.router, prefix="/api", tags=["Air Quality"]
 )
 
 

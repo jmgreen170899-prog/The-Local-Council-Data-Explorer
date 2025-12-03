@@ -17,7 +17,7 @@ from services.planning_service import PlanningService, get_planning_service
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(prefix="/planning")
 
 
 def get_service(
@@ -35,7 +35,7 @@ def get_service(
 
 
 @router.get(
-    "/",
+    "",
     response_model=PlanningResponse,
     responses={
         400: {"model": ErrorResponse, "description": "Bad Request"},
