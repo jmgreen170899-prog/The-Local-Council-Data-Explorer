@@ -7,16 +7,10 @@
 /**
  * Base URL for the backend API.
  * Configured via VITE_API_BASE_URL environment variable.
- * Throws an error at build/runtime if not configured.
+ * Points to http://council-explorer-api:8000 in Docker environments.
+ * Falls back to empty string for local development with Vite proxy.
  */
-const envApiBase = import.meta.env.VITE_API_BASE_URL;
-if (!envApiBase) {
-  throw new Error(
-    "VITE_API_BASE_URL environment variable is not set. " +
-    "Please configure it in your .env file."
-  );
-}
-export const API_BASE: string = envApiBase;
+export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
 /** Maximum number of retry attempts for transient failures */
 export const MAX_RETRIES = 3;
