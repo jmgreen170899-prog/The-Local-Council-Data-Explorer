@@ -43,7 +43,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - VITE_API_BASE_URL=http://localhost:8000
+        # IMPORTANT — docker containers cannot call localhost
+        # The frontend must call backend via the container hostname
+        - VITE_API_BASE_URL=http://council-explorer-api:8000
     container_name: council-explorer-web
     ports:
       - "3000:80"
