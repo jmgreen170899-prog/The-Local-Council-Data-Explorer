@@ -12,3 +12,14 @@ export interface BinCollectionResponse {
   council: string;
   bins: BinCollection[];
 }
+
+export interface BinCollectionRequest {
+  postcode?: string;
+  house_number?: string;
+  uprn?: string;
+}
+
+export interface ApiError {
+  message: string;
+  status?: number;
+}

@@ -2,24 +2,61 @@
  * API functions for the bins feature.
  */
 
-import type { BinCollectionResponse } from "./types";
+import type { BinCollectionResponse, ApiError } from "./types";
 
 const API_BASE = "/api/bins";
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
+
+async function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 /**
  * Fetch bin collection data for a given postcode or UPRN.
+ * Includes retry logic for transient failures.
  */
 export async function fetchBinCollections(
   postcode: string = "",
-  uprn: string = ""
+  uprn: string = "",
+  houseNumber: string = ""
 ): Promise<BinCollectionResponse> {
   const params = new URLSearchParams();
   if (postcode) params.append("postcode", postcode);
   if (uprn) params.append("uprn", uprn);
+  if (houseNumber) params.append("house_number", houseNumber);
 
-  const response = await fetch(`${API_BASE}?${params.toString()}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch bin collections");
+  let lastError: ApiError = { message: "Unknown error" };
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const response = await fetch(`${API_BASE}?${params.toString()}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = (errorData as { detail?: string }).detail || `HTTP error ${response.status}`;
+        
+        if (response.status >= 500 && attempt < MAX_RETRIES - 1) {
+          await delay(RETRY_DELAY_MS * (attempt + 1));
+          continue;
+        }
+        
+        throw { message: errorMessage, status: response.status } as ApiError;
+      }
+      
+      return response.json() as Promise<BinCollectionResponse>;
+    } catch (error) {
+      if ((error as ApiError).status !== undefined) {
+        throw error;
+      }
+      
+      lastError = { message: error instanceof Error ? error.message : "Network error" };
+      
+      if (attempt < MAX_RETRIES - 1) {
+        await delay(RETRY_DELAY_MS * (attempt + 1));
+      }
+    }
   }
-  return response.json();
+
+  throw lastError;
 }
