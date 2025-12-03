@@ -9,8 +9,8 @@ from models.bins import (
     BinCollection,
     BinCollectionRequest,
     BinCollectionResponse,
-    ErrorResponse,
 )
+from models.errors import ErrorResponse
 from models.planning import PlanningApplication, PlanningRequest, PlanningResponse
 
 __all__ = [
@@ -18,7 +18,6 @@ __all__ = [
     "BinCollection",
     "BinCollectionRequest",
     "BinCollectionResponse",
-    "ErrorResponse",
     # Planning models
     "PlanningApplication",
     "PlanningRequest",
@@ -27,4 +26,6 @@ __all__ = [
     "AirQualityRequest",
     "AirQualityResponse",
     "Pollutant",
+    # Error models
+    "ErrorResponse",
 ]

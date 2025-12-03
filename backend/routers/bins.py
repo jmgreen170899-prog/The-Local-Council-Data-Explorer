@@ -11,7 +11,8 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from config import Settings, get_settings
-from models.bins import BinCollectionResponse, ErrorResponse
+from models.bins import BinCollectionResponse
+from models.errors import ErrorResponse
 from services.bins_service import BinsService, get_bins_service
 
 logger = logging.getLogger(__name__)

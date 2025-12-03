@@ -40,10 +40,3 @@ class BinCollectionRequest(BaseModel):
     uprn: Optional[str] = Field(
         default=None, description="Unique Property Reference Number"
     )
-
-
-class ErrorResponse(BaseModel):
-    """Model for error responses."""
-
-    detail: str = Field(..., description="Error message")
-    code: Optional[str] = Field(default=None, description="Error code")

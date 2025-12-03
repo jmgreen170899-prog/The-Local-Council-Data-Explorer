@@ -11,7 +11,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from config import Settings, get_settings
-from models.bins import ErrorResponse
+from models.errors import ErrorResponse
 from models.planning import PlanningResponse
 from services.planning_service import PlanningService, get_planning_service
 

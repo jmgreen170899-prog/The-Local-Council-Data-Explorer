@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from config import Settings, get_settings
 from models.air_quality import AirQualityResponse
-from models.bins import ErrorResponse
+from models.errors import ErrorResponse
 from services.air_service import AirQualityService, get_air_quality_service
 
 logger = logging.getLogger(__name__)
