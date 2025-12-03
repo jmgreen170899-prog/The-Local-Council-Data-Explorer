@@ -6,6 +6,12 @@ This package contains business logic and data processing services.
 
 from services.air_service import AirQualityService, get_air_quality_service
 from services.bins_service import BinsService, get_bins_service
+from services.cache import (
+    InMemoryCache,
+    get_air_quality_cache,
+    get_bins_cache,
+    get_planning_cache,
+)
 from services.planning_service import PlanningService, get_planning_service
 
 __all__ = [
@@ -15,4 +21,8 @@ __all__ = [
     "get_air_quality_service",
     "get_bins_service",
     "get_planning_service",
+    "InMemoryCache",
+    "get_bins_cache",
+    "get_planning_cache",
+    "get_air_quality_cache",
 ]
