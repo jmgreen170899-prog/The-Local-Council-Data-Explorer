@@ -25,8 +25,3 @@ export interface PlanningRequest {
   date_from?: string;
   date_to?: string;
 }
-
-export interface ApiError {
-  message: string;
-  status?: number;
-}

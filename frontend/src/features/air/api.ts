@@ -2,16 +2,14 @@
  * API functions for the air quality feature.
  */
 
-import type { AirQualityResponse, ApiError } from "./types";
-
-// Falls back to relative URL for local dev (uses vite proxy) or nginx proxy
-const API_BASE = `${import.meta.env.VITE_API_BASE_URL || ''}/api/air-quality`;
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 1000;
-
-async function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+import type { AirQualityResponse } from "./types";
+import {
+  API_BASE,
+  MAX_RETRIES,
+  RETRY_DELAY_MS,
+  delay,
+  type ApiError,
+} from "../../api/client";
 
 /**
  * Fetch air quality data for a given area.
@@ -27,7 +25,7 @@ export async function fetchAirQuality(
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const response = await fetch(`${API_BASE}?${params.toString()}`);
+      const response = await fetch(`${API_BASE}/api/air-quality?${params.toString()}`);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

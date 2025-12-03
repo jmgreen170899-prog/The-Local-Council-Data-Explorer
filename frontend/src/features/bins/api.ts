@@ -2,16 +2,14 @@
  * API functions for the bins feature.
  */
 
-import type { BinCollectionResponse, ApiError } from "./types";
-
-// Falls back to relative URL for local dev (uses vite proxy) or nginx proxy
-const API_BASE = `${import.meta.env.VITE_API_BASE_URL || ''}/api/bins`;
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 1000;
-
-async function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+import type { BinCollectionResponse } from "./types";
+import {
+  API_BASE,
+  MAX_RETRIES,
+  RETRY_DELAY_MS,
+  delay,
+  type ApiError,
+} from "../../api/client";
 
 /**
  * Fetch bin collection data for a given postcode or UPRN.
@@ -31,7 +29,7 @@ export async function fetchBinCollections(
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const response = await fetch(`${API_BASE}?${params.toString()}`);
+      const response = await fetch(`${API_BASE}/api/bins?${params.toString()}`);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

@@ -18,8 +18,3 @@ export interface BinCollectionRequest {
   house_number?: string;
   uprn?: string;
 }
-
-export interface ApiError {
-  message: string;
-  status?: number;
-}
