@@ -29,7 +29,7 @@ export async function fetchBinCollections(
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const response = await fetch(`${API_BASE}/api/bins?${params.toString()}`);
+      const response = await fetch(`${API_BASE}/bins?${params.toString()}`);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
