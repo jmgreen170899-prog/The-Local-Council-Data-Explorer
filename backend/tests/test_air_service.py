@@ -262,5 +262,9 @@ class TestAirQualityServicePollutants:
         result = await self.service.get_air_quality(area="London")
         
         if result.pollutants:
-            highest_index = max(p.index or 0 for p in result.pollutants)
+            # Use explicit null checking for pollutant indices (DAQI ranges 1-10)
+            highest_index = max(
+                p.index if p.index is not None else 1
+                for p in result.pollutants
+            )
             assert result.max_daqi == highest_index

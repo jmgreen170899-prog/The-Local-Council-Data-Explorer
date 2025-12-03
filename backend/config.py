@@ -9,15 +9,20 @@ This module contains application-wide configuration settings such as:
 - Mock mode configuration for offline/local development
 """
 
-import os
 from typing import Optional
 
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=True,
+    )
 
     APP_NAME: str = "Local Council Data Explorer"
     DEBUG: bool = Field(default=False)
@@ -53,13 +58,6 @@ class Settings(BaseSettings):
 
     # Retry settings
     HTTP_MAX_RETRIES: int = 3
-
-    class Config:
-        """Pydantic settings configuration."""
-
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = True
 
 
 def get_settings() -> Settings:

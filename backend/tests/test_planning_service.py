@@ -40,9 +40,14 @@ class TestPlanningService:
         
         assert isinstance(result, PlanningResponse)
         # All applications should be within date range
+        # Use datetime parsing for proper date comparison
+        from datetime import datetime
+        date_from_dt = datetime.strptime("2025-10-01", "%Y-%m-%d")
+        date_to_dt = datetime.strptime("2025-11-30", "%Y-%m-%d")
         for app in result.applications:
-            assert app.received_date >= "2025-10-01"
-            assert app.received_date <= "2025-11-30"
+            app_date = datetime.strptime(app.received_date, "%Y-%m-%d")
+            assert app_date >= date_from_dt
+            assert app_date <= date_to_dt
 
     @pytest.mark.asyncio
     async def test_get_planning_applications_raises_on_missing_lpa(self):
