@@ -90,6 +90,66 @@ This project demonstrates modern full-stack development practices including API 
 
 ---
 
+## 📁 Project Structure
+
+```
+local-council-data-explorer/
+├── backend/                        # FastAPI backend application
+│   ├── main.py                     # Application entry point
+│   ├── config.py                   # Configuration management
+│   ├── routers/                    # HTTP route handlers
+│   │   ├── bins.py                 # /api/bins endpoint
+│   │   ├── planning.py             # /api/planning endpoint
+│   │   └── air_quality.py          # /api/air-quality endpoint
+│   ├── services/                   # Business logic layer
+│   │   ├── bins_service.py         # Bin collection data processing
+│   │   ├── planning_service.py     # Planning data processing
+│   │   ├── air_service.py          # Air quality data processing
+│   │   └── cache.py                # In-memory caching
+│   ├── models/                     # Pydantic data models
+│   │   ├── bins.py                 # Bin collection schemas
+│   │   ├── planning.py             # Planning schemas
+│   │   ├── air_quality.py          # Air quality schemas
+│   │   └── errors.py               # Error response schemas
+│   ├── tests/                      # Pytest test suite
+│   ├── Dockerfile                  # Backend container
+│   └── requirements.txt            # Python dependencies
+├── frontend/                       # React frontend application
+│   ├── src/
+│   │   ├── main.tsx                # Application bootstrap
+│   │   ├── App.tsx                 # Root component
+│   │   ├── api/                    # API client configuration
+│   │   │   └── client.ts           # Centralized API config
+│   │   ├── components/             # Shared UI components
+│   │   │   ├── Layout.tsx          # Page layout with navigation
+│   │   │   ├── Card.tsx            # Container component
+│   │   │   └── ChartWrapper.tsx    # Chart display wrapper
+│   │   ├── features/               # Feature modules
+│   │   │   ├── bins/               # Bin collections feature
+│   │   │   ├── planning/           # Planning applications feature
+│   │   │   └── air/                # Air quality feature
+│   │   └── hooks/                  # Custom React hooks
+│   │       └── useApi.ts           # Async data fetching hook
+│   ├── Dockerfile                  # Frontend container
+│   ├── nginx.conf                  # Production nginx config
+│   └── package.json                # Node dependencies
+├── docs/                           # Documentation assets
+│   └── SCREENSHOTS.md              # Screenshot capture guide
+├── portfolio/                      # Portfolio documentation
+│   ├── README.md                   # Portfolio overview
+│   ├── CASE_STUDY.md               # Detailed case study
+│   └── ARCHITECTURE_DIAGRAMS.md    # Mermaid diagrams
+├── docker-compose.yml              # Container orchestration
+├── README.md                       # Main project documentation
+├── Architecture.md                 # System architecture
+├── API_REFERENCE.md                # API endpoint reference
+├── SYSTEM_FLOW.md                  # Sequence diagrams
+├── SETUP.md                        # Installation guide
+└── PORTFOLIO_NOTES.md              # Interview talking points
+```
+
+---
+
 ## 🏗️ Architecture Overview
 
 The application follows a clean separation of concerns with a layered architecture:
@@ -133,13 +193,13 @@ The application follows a clean separation of concerns with a layered architectu
     └───────────────┘   └───────────────┘   └───────────────┘
 ```
 
-For detailed architecture documentation, see [ARCHITECTURE.md](./ARCHITECTURE.md).
+For detailed architecture documentation, see [Architecture.md](./Architecture.md).
 
 ---
 
 ## 📸 Screenshots
 
-> **Note:** Add screenshots of the application here.
+> **Note:** Screenshots will be added after initial deployment. See [docs/SCREENSHOTS.md](./docs/SCREENSHOTS.md) for capture instructions.
 
 | Bin Collections | Planning Applications | Air Quality |
 |-----------------|----------------------|-------------|
@@ -297,9 +357,20 @@ npm run lint
 
 | Document | Description |
 |----------|-------------|
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | Detailed system architecture and design decisions |
+| [ARCHITECTURE.md](./Architecture.md) | Detailed system architecture and design decisions |
 | [SYSTEM_FLOW.md](./SYSTEM_FLOW.md) | Sequence diagrams and data flow documentation |
 | [API_REFERENCE.md](./API_REFERENCE.md) | Complete API endpoint reference |
+| [SETUP.md](./SETUP.md) | Installation and setup guide |
+| [PORTFOLIO_NOTES.md](./PORTFOLIO_NOTES.md) | Talking points for recruiters and interviews |
+| [docs/SCREENSHOTS.md](./docs/SCREENSHOTS.md) | Screenshot capture guide |
+
+### Portfolio Resources
+
+| Document | Description |
+|----------|-------------|
+| [portfolio/README.md](./portfolio/README.md) | Portfolio overview |
+| [portfolio/CASE_STUDY.md](./portfolio/CASE_STUDY.md) | Detailed case study |
+| [portfolio/ARCHITECTURE_DIAGRAMS.md](./portfolio/ARCHITECTURE_DIAGRAMS.md) | Mermaid diagrams |
 
 ---
 
@@ -331,6 +402,38 @@ This project showcases professional-grade full-stack development skills:
 - **Defensive Programming** – Fallback responses for graceful degradation
 - **Code Organization** – Clear, consistent project structure
 - **Documentation** – Comprehensive inline documentation and API docs
+
+---
+
+## 🔮 Future Improvements
+
+### Short-Term Enhancements
+- [ ] Additional council integrations (beyond City of York)
+- [ ] CI/CD pipeline with GitHub Actions
+- [ ] End-to-end testing with Playwright
+
+### Medium-Term Enhancements
+- [ ] User accounts for saved postcodes/preferences
+- [ ] Email/SMS notifications for bin collections
+- [ ] WebSocket support for live air quality updates
+- [ ] Database persistence (PostgreSQL/SQLite)
+
+### Long-Term Vision
+- [ ] Mobile application (React Native)
+- [ ] Historical trend analysis and insights
+- [ ] Machine learning for bin collection disruption prediction
+- [ ] Multi-region deployment for redundancy
+
+---
+
+## 👤 Author
+
+**Local Council Data Explorer**
+
+This project was built as a portfolio demonstration piece showcasing production-grade full-stack development skills.
+
+- 📧 Contact via GitHub Issues
+- 🔗 See [PORTFOLIO_NOTES.md](./PORTFOLIO_NOTES.md) for interview talking points
 
 ---
 
