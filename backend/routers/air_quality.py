@@ -21,13 +21,13 @@ router = APIRouter()
 
 
 def get_service(
-    settings: Annotated[Settings, Depends(get_settings)]
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> AirQualityService:
     """Dependency injection for AirQualityService.
-    
+
     Args:
         settings: Application settings from dependency injection.
-        
+
     Returns:
         AirQualityService instance.
     """
@@ -56,14 +56,14 @@ async def get_air_quality(
     ] = None,
 ) -> AirQualityResponse:
     """Get air quality data for an area.
-    
+
     Args:
         service: Injected AirQualityService instance.
         area: Geographic area or region name. Defaults to "Yorkshire & Humber".
-        
+
     Returns:
         AirQualityResponse with DAQI index, summary, and pollutant breakdown.
-        
+
     Raises:
         HTTPException: If the external service fails.
     """

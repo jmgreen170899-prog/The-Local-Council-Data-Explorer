@@ -4,8 +4,6 @@ Tests for the cache module.
 
 import time
 
-import pytest
-
 from services.cache import CacheEntry, InMemoryCache
 
 
@@ -49,19 +47,19 @@ class TestInMemoryCache:
         """Test that get returns None for an expired entry."""
         cache = InMemoryCache(default_ttl=1)
         cache.set("test_key", "test_value", ttl=0)  # Expires immediately
-        
+
         # Wait a tiny bit for the entry to expire
         time.sleep(0.01)
-        
+
         assert cache.get("test_key") is None
 
     def test_delete_existing_key(self):
         """Test deleting an existing key."""
         cache = InMemoryCache()
         cache.set("test_key", "test_value")
-        
+
         result = cache.delete("test_key")
-        
+
         assert result is True
         assert cache.get("test_key") is None
 
@@ -76,9 +74,9 @@ class TestInMemoryCache:
         cache = InMemoryCache()
         cache.set("key1", "value1")
         cache.set("key2", "value2")
-        
+
         cache.clear()
-        
+
         assert cache.get("key1") is None
         assert cache.get("key2") is None
         assert cache.size() == 0
@@ -87,10 +85,10 @@ class TestInMemoryCache:
         """Test getting cache size."""
         cache = InMemoryCache()
         assert cache.size() == 0
-        
+
         cache.set("key1", "value1")
         assert cache.size() == 1
-        
+
         cache.set("key2", "value2")
         assert cache.size() == 2
 
@@ -99,12 +97,12 @@ class TestInMemoryCache:
         cache = InMemoryCache()
         cache.set("key1", "value1", ttl=0)  # Expires immediately
         cache.set("key2", "value2", ttl=1000)  # Won't expire
-        
+
         # Wait a tiny bit for the entry to expire
         time.sleep(0.01)
-        
+
         removed = cache.cleanup()
-        
+
         assert removed == 1
         assert cache.get("key1") is None
         assert cache.get("key2") == "value2"
@@ -138,7 +136,7 @@ class TestInMemoryCache:
         """Test setting a custom TTL."""
         cache = InMemoryCache(default_ttl=1)
         cache.set("test_key", "test_value", ttl=1000)
-        
+
         # Value should still be there after default TTL would have expired
         time.sleep(0.1)
         assert cache.get("test_key") == "test_value"

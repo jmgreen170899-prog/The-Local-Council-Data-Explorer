@@ -20,14 +20,12 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-def get_service(
-    settings: Annotated[Settings, Depends(get_settings)]
-) -> BinsService:
+def get_service(settings: Annotated[Settings, Depends(get_settings)]) -> BinsService:
     """Dependency injection for BinsService.
-    
+
     Args:
         settings: Application settings from dependency injection.
-        
+
     Returns:
         BinsService instance.
     """
@@ -71,16 +69,16 @@ async def get_bins(
     ] = None,
 ) -> BinCollectionResponse:
     """Get bin collection schedule for a property.
-    
+
     Args:
         service: Injected BinsService instance.
         postcode: UK postcode for the property.
         house_number: House number or name.
         uprn: Unique Property Reference Number.
-        
+
     Returns:
         BinCollectionResponse with address, council, and bin collection details.
-        
+
     Raises:
         HTTPException: If the request is invalid or external service fails.
     """

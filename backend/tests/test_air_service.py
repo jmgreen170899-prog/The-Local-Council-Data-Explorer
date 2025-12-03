@@ -54,7 +54,7 @@ class TestAirQualityService:
     async def test_get_air_quality_returns_mock_data(self):
         """Test that mock mode returns mock data."""
         result = await self.service.get_air_quality(area="Yorkshire")
-        
+
         assert isinstance(result, AirQualityResponse)
         assert "Yorkshire" in result.area
         assert 1 <= result.max_daqi <= 10
@@ -65,7 +65,7 @@ class TestAirQualityService:
     async def test_get_air_quality_default_area(self):
         """Test that default area is used when not provided."""
         result = await self.service.get_air_quality()
-        
+
         assert isinstance(result, AirQualityResponse)
         assert result.area == "Yorkshire & Humber"
 
@@ -73,7 +73,7 @@ class TestAirQualityService:
     async def test_get_air_quality_london(self):
         """Test getting air quality for London."""
         result = await self.service.get_air_quality(area="London")
-        
+
         assert "London" in result.area
         # London mock data has moderate air quality
         assert result.summary == "Moderate"
@@ -83,10 +83,10 @@ class TestAirQualityService:
         """Test that results are cached."""
         # First call
         result1 = await self.service.get_air_quality(area="Yorkshire")
-        
+
         # Second call should return cached data
         result2 = await self.service.get_air_quality(area="Yorkshire")
-        
+
         # Should be the same object from cache
         assert result1 == result2
         assert self.cache.size() == 1
@@ -94,9 +94,9 @@ class TestAirQualityService:
     @pytest.mark.asyncio
     async def test_get_air_quality_different_areas(self):
         """Test that different areas get different cache entries."""
-        result1 = await self.service.get_air_quality(area="Yorkshire")
-        result2 = await self.service.get_air_quality(area="London")
-        
+        await self.service.get_air_quality(area="Yorkshire")
+        await self.service.get_air_quality(area="London")
+
         # Should have two cache entries
         assert self.cache.size() == 2
 
@@ -125,24 +125,24 @@ class TestAirQualityServiceTransformation:
                                         "@SpeciesCode": "NO2",
                                         "@AirQualityIndex": "2",
                                         "@AirQualityBand": "Low",
-                                        "@Value": "18.5"
+                                        "@Value": "18.5",
                                     },
                                     {
                                         "@SpeciesCode": "PM2.5",
                                         "@AirQualityIndex": "3",
                                         "@AirQualityBand": "Low",
-                                        "@Value": "10.0"
+                                        "@Value": "10.0",
                                     },
-                                ]
+                                ],
                             }
-                        ]
+                        ],
                     }
-                ]
+                ],
             }
         }
-        
+
         result = self.service._transform_ukair_api_response(data, "Yorkshire")
-        
+
         assert result.area == "Yorkshire"
         assert result.max_daqi == 3  # Highest index from pollutants
         assert result.summary == "Low"
@@ -162,15 +162,15 @@ class TestAirQualityServiceTransformation:
                             "@SpeciesCode": "NO2",
                             "@AirQualityIndex": "2",
                             "@AirQualityBand": "Low",
-                            "@Value": "18.5"
-                        }
-                    }
-                }
+                            "@Value": "18.5",
+                        },
+                    },
+                },
             }
         }
-        
+
         result = self.service._transform_ukair_api_response(data, "Yorkshire")
-        
+
         assert result.area == "Yorkshire"
         assert len(result.pollutants) == 1
         assert result.pollutants[0].name == "NO2"
@@ -181,11 +181,11 @@ class TestAirQualityServiceTransformation:
             "@SpeciesCode": "NO2",
             "@AirQualityIndex": "4",
             "@AirQualityBand": "Moderate",
-            "@Value": "42.5"
+            "@Value": "42.5",
         }
-        
+
         result = self.service._parse_species(species)
-        
+
         assert result is not None
         assert result.name == "NO2"
         assert result.value == 42.5
@@ -198,9 +198,9 @@ class TestAirQualityServiceTransformation:
         species = {
             "@SpeciesCode": "O3",
         }
-        
+
         result = self.service._parse_species(species)
-        
+
         assert result is not None
         assert result.name == "O3"
         assert result.value == 0.0
@@ -214,12 +214,12 @@ class TestAirQualityServiceTransformation:
             Pollutant(name="NO2", value=35.0, units="µg/m³", band="Moderate", index=4),
             Pollutant(name="PM2.5", value=10.0, units="µg/m³", band="Low", index=2),
         ]
-        
+
         result = self.service._deduplicate_pollutants(pollutants)
-        
+
         # Should have 2 unique pollutants
         assert len(result) == 2
-        
+
         # NO2 should have the higher index
         no2 = next(p for p in result if p.name == "NO2")
         assert no2.index == 4
@@ -228,7 +228,7 @@ class TestAirQualityServiceTransformation:
     def test_create_fallback_response(self):
         """Test fallback response creation."""
         result = self.service._create_fallback_response("Unknown Area")
-        
+
         assert result.area == "Unknown Area"
         assert result.max_daqi == 1
         assert result.summary == "Low"
@@ -248,7 +248,7 @@ class TestAirQualityServicePollutants:
     async def test_pollutants_have_required_fields(self):
         """Test that all pollutants have required fields."""
         result = await self.service.get_air_quality(area="London")
-        
+
         for pollutant in result.pollutants:
             assert pollutant.name is not None
             assert pollutant.value is not None
@@ -260,11 +260,10 @@ class TestAirQualityServicePollutants:
     async def test_max_daqi_matches_highest_pollutant(self):
         """Test that max_daqi matches the highest pollutant index."""
         result = await self.service.get_air_quality(area="London")
-        
+
         if result.pollutants:
             # Use explicit null checking for pollutant indices (DAQI ranges 1-10)
             highest_index = max(
-                p.index if p.index is not None else 1
-                for p in result.pollutants
+                p.index if p.index is not None else 1 for p in result.pollutants
             )
             assert result.max_daqi == highest_index

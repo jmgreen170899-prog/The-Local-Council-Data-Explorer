@@ -47,6 +47,4 @@ class AirQualityResponse(BaseModel):
 class AirQualityRequest(BaseModel):
     """Model for air quality request parameters."""
 
-    area: Optional[str] = Field(
-        default=None, description="Geographic area to query"
-    )
+    area: Optional[str] = Field(default=None, description="Geographic area to query")

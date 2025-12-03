@@ -22,7 +22,7 @@ T = TypeVar("T")
 @dataclass
 class CacheEntry(Generic[T]):
     """Represents a single entry in the cache.
-    
+
     Attributes:
         value: The cached value.
         expires_at: Unix timestamp when the entry expires.
@@ -35,7 +35,7 @@ class CacheEntry(Generic[T]):
 
     def is_expired(self) -> bool:
         """Check if this cache entry has expired.
-        
+
         Returns:
             True if the entry has expired, False otherwise.
         """
@@ -44,18 +44,18 @@ class CacheEntry(Generic[T]):
 
 class InMemoryCache:
     """Thread-safe in-memory cache with TTL support.
-    
+
     This cache stores key-value pairs with automatic expiration.
     Expired entries are cleaned up lazily on access and periodically
     via the cleanup method.
-    
+
     Attributes:
         default_ttl: Default time-to-live for entries in seconds.
     """
 
     def __init__(self, default_ttl: int = 300):
         """Initialize the cache.
-        
+
         Args:
             default_ttl: Default time-to-live for cache entries in seconds.
                         Defaults to 300 seconds (5 minutes).
@@ -66,12 +66,12 @@ class InMemoryCache:
 
     def get(self, key: str) -> Optional[Any]:
         """Retrieve a value from the cache.
-        
+
         If the entry exists but has expired, it will be removed and None returned.
-        
+
         Args:
             key: The cache key to look up.
-            
+
         Returns:
             The cached value if found and not expired, None otherwise.
         """
@@ -91,7 +91,7 @@ class InMemoryCache:
 
     def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
         """Store a value in the cache.
-        
+
         Args:
             key: The cache key.
             value: The value to cache.
@@ -113,10 +113,10 @@ class InMemoryCache:
 
     def delete(self, key: str) -> bool:
         """Remove an entry from the cache.
-        
+
         Args:
             key: The cache key to remove.
-            
+
         Returns:
             True if the key existed and was removed, False otherwise.
         """
@@ -135,7 +135,7 @@ class InMemoryCache:
 
     def cleanup(self) -> int:
         """Remove all expired entries from the cache.
-        
+
         Returns:
             Number of entries removed.
         """
@@ -154,7 +154,7 @@ class InMemoryCache:
 
     def size(self) -> int:
         """Get the number of entries in the cache.
-        
+
         Returns:
             Number of cache entries (including potentially expired ones).
         """
@@ -163,14 +163,14 @@ class InMemoryCache:
 
     def generate_key(self, prefix: str, *args, **kwargs) -> str:
         """Generate a cache key from prefix and arguments.
-        
+
         This helper method creates consistent cache keys from function arguments.
-        
+
         Args:
             prefix: A prefix for the cache key (e.g., service name).
             *args: Positional arguments to include in the key.
             **kwargs: Keyword arguments to include in the key.
-            
+
         Returns:
             A string cache key.
         """
@@ -190,7 +190,7 @@ air_quality_cache = InMemoryCache(default_ttl=600)  # 10 minutes for air quality
 
 def get_bins_cache() -> InMemoryCache:
     """Get the cache instance for bin collection data.
-    
+
     Returns:
         InMemoryCache instance configured for bin data.
     """
@@ -199,7 +199,7 @@ def get_bins_cache() -> InMemoryCache:
 
 def get_planning_cache() -> InMemoryCache:
     """Get the cache instance for planning application data.
-    
+
     Returns:
         InMemoryCache instance configured for planning data.
     """
@@ -208,7 +208,7 @@ def get_planning_cache() -> InMemoryCache:
 
 def get_air_quality_cache() -> InMemoryCache:
     """Get the cache instance for air quality data.
-    
+
     Returns:
         InMemoryCache instance configured for air quality data.
     """

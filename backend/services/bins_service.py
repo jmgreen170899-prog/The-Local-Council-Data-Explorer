@@ -88,11 +88,11 @@ BIN_TYPE_MAPPING: Dict[str, str] = {
 
 class BinsService:
     """Service for retrieving bin collection data from City of York Council API.
-    
+
     This service wraps the City of York Council Waste Collection Lookup API
     (https://waste-api.york.gov.uk/api/Collections) and transforms the response
     into our internal data model.
-    
+
     Attributes:
         settings: Application settings instance.
         base_url: Base URL for the City of York API.
@@ -102,7 +102,7 @@ class BinsService:
 
     def __init__(self, settings: Settings, cache: Optional[InMemoryCache] = None):
         """Initialize the bins service.
-        
+
         Args:
             settings: Application settings instance.
             cache: Optional cache instance. If not provided, uses global cache.
@@ -122,7 +122,7 @@ class BinsService:
         uprn: Optional[str] = None,
     ) -> BinCollectionResponse:
         """Retrieve bin collection data for a given location.
-        
+
         This method first checks the cache for existing data. If not found,
         it fetches from the City of York API and caches the result.
 
@@ -140,7 +140,7 @@ class BinsService:
         """
         # Generate cache key based on input parameters
         cache_key = self.cache.generate_key("bins", uprn=uprn, postcode=postcode)
-        
+
         # Check cache first
         cached = self.cache.get(cache_key)
         if cached is not None:
@@ -151,7 +151,7 @@ class BinsService:
             result = self._get_mock_data(postcode, house_number, uprn)
         else:
             result = await self._fetch_from_api(postcode, house_number, uprn)
-        
+
         # Cache the result
         self.cache.set(cache_key, result, ttl=self.settings.CACHE_TTL_BINS)
         return result
@@ -205,7 +205,7 @@ class BinsService:
         uprn: Optional[str] = None,
     ) -> BinCollectionResponse:
         """Fetch bin collection data from City of York Council Waste API.
-        
+
         The API endpoint format is:
         GET https://waste-api.york.gov.uk/api/Collections/GetBinCollectionDataForUprn/{UPRN}
 
@@ -230,7 +230,7 @@ class BinsService:
 
         # Build the API URL for City of York Waste Collection API
         url = f"{self.base_url}/GetBinCollectionDataForUprn/{uprn}"
-        
+
         logger.info(f"Fetching bin collection data from: {url}")
 
         try:
@@ -240,7 +240,7 @@ class BinsService:
                 data = response.json()
 
             return self._transform_york_api_response(data, uprn)
-            
+
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error from City of York API: {e}")
             # Return fallback on 404 (UPRN not found)
@@ -255,7 +255,7 @@ class BinsService:
         self, data: Any, uprn: str
     ) -> BinCollectionResponse:
         """Transform City of York API response into internal model.
-        
+
         The City of York API returns data in the following structure:
         {
             "bins": [
@@ -267,7 +267,7 @@ class BinsService:
                 ...
             ]
         }
-        
+
         Or in some cases:
         {
             "services": [
@@ -290,34 +290,34 @@ class BinsService:
         """
         bins: List[BinCollection] = []
         address = "Unknown Address"
-        
+
         # Handle different response formats from the API
         if isinstance(data, dict):
             # Extract address if available
             address = data.get("address", data.get("propertyAddress", f"UPRN: {uprn}"))
-            
+
             # Check for "bins" array format
             raw_bins = data.get("bins", [])
             if raw_bins:
                 bins = self._parse_bins_array(raw_bins)
-            
-            # Check for "services" array format  
+
+            # Check for "services" array format
             services = data.get("services", [])
             if services:
                 bins = self._parse_services_array(services)
-                
+
             # Check for direct collection arrays
             collections = data.get("collections", [])
             if collections:
                 bins = self._parse_collections_array(collections)
-                
+
         elif isinstance(data, list):
             # If the response is directly a list of bins
             bins = self._parse_bins_array(data)
-        
+
         # Sort bins by collection date
         bins = self._sort_bins_by_date(bins)
-        
+
         return BinCollectionResponse(
             address=address,
             council="City of York Council",
@@ -326,11 +326,11 @@ class BinsService:
 
     def _parse_bins_array(self, raw_bins: List[Dict[str, Any]]) -> List[BinCollection]:
         """Parse bins array from City of York API response.
-        
+
         Handles the format:
         {
             "binType": "GREY BIN",
-            "binTypeDescription": "Rubbish collection", 
+            "binTypeDescription": "Rubbish collection",
             "nextCollectionDate": "2025-12-09T00:00:00"
         }
 
@@ -341,7 +341,7 @@ class BinsService:
             List of BinCollection objects.
         """
         bins: List[BinCollection] = []
-        
+
         for bin_item in raw_bins:
             # Get bin type - check multiple possible field names
             bin_type = (
@@ -351,10 +351,10 @@ class BinsService:
                 or bin_item.get("binTypeDescription")
                 or "Unknown"
             )
-            
+
             # Normalize bin type using mapping
             normalized_type = self._normalize_bin_type(bin_type)
-            
+
             # Get collection date - check multiple possible field names
             collection_date = (
                 bin_item.get("nextCollectionDate")
@@ -363,10 +363,10 @@ class BinsService:
                 or bin_item.get("date")
                 or ""
             )
-            
+
             # Parse and normalize the date
             normalized_date = self._normalize_date(collection_date)
-            
+
             if normalized_date:  # Only add if we have a valid date
                 bins.append(
                     BinCollection(
@@ -374,14 +374,14 @@ class BinsService:
                         collection_date=normalized_date,
                     )
                 )
-        
+
         return bins
 
     def _parse_services_array(
         self, services: List[Dict[str, Any]]
     ) -> List[BinCollection]:
         """Parse services array from City of York API response.
-        
+
         Handles the format:
         {
             "service": "REFUSE",
@@ -396,7 +396,7 @@ class BinsService:
             List of BinCollection objects.
         """
         bins: List[BinCollection] = []
-        
+
         for service in services:
             service_type = (
                 service.get("service")
@@ -404,18 +404,18 @@ class BinsService:
                 or service.get("type")
                 or "Unknown"
             )
-            
+
             normalized_type = self._normalize_bin_type(service_type)
-            
+
             collection_date = (
                 service.get("nextCollection")
                 or service.get("next_collection")
                 or service.get("collectionDate")
                 or ""
             )
-            
+
             normalized_date = self._normalize_date(collection_date)
-            
+
             if normalized_date:
                 bins.append(
                     BinCollection(
@@ -423,7 +423,7 @@ class BinsService:
                         collection_date=normalized_date,
                     )
                 )
-        
+
         return bins
 
     def _parse_collections_array(
@@ -438,7 +438,7 @@ class BinsService:
             List of BinCollection objects.
         """
         bins: List[BinCollection] = []
-        
+
         for coll in collections:
             coll_type = (
                 coll.get("type")
@@ -446,18 +446,18 @@ class BinsService:
                 or coll.get("service")
                 or "Unknown"
             )
-            
+
             normalized_type = self._normalize_bin_type(coll_type)
-            
+
             collection_date = (
                 coll.get("collection_date")
                 or coll.get("date")
                 or coll.get("nextCollection")
                 or ""
             )
-            
+
             normalized_date = self._normalize_date(collection_date)
-            
+
             if normalized_date:
                 bins.append(
                     BinCollection(
@@ -465,12 +465,12 @@ class BinsService:
                         collection_date=normalized_date,
                     )
                 )
-        
+
         return bins
 
     def _normalize_bin_type(self, bin_type: str) -> str:
         """Normalize bin type to user-friendly name.
-        
+
         Maps API-specific bin type names to consistent, user-friendly names.
 
         Args:
@@ -481,17 +481,17 @@ class BinsService:
         """
         # Convert to uppercase for lookup
         upper_type = bin_type.upper().strip()
-        
+
         # Check mapping
         if upper_type in BIN_TYPE_MAPPING:
             return BIN_TYPE_MAPPING[upper_type]
-        
+
         # Return title case of original if no mapping found
         return bin_type.strip().title()
 
     def _normalize_date(self, date_str: str) -> str:
         """Normalize date string to ISO format (YYYY-MM-DD).
-        
+
         Handles various date formats from the API:
         - ISO format: "2025-12-09T00:00:00"
         - Date only: "2025-12-09"
@@ -505,9 +505,9 @@ class BinsService:
         """
         if not date_str:
             return ""
-        
+
         date_str = str(date_str).strip()
-        
+
         # Try different date formats
         formats = [
             "%Y-%m-%dT%H:%M:%S",  # ISO with time
@@ -516,20 +516,18 @@ class BinsService:
             "%d/%m/%Y",  # UK format
             "%d-%m-%Y",  # UK format with dashes
         ]
-        
+
         for fmt in formats:
             try:
                 parsed = datetime.strptime(date_str, fmt)
                 return parsed.strftime("%Y-%m-%d")
             except ValueError:
                 continue
-        
+
         logger.warning(f"Could not parse date: {date_str}")
         return date_str  # Return original if parsing fails
 
-    def _sort_bins_by_date(
-        self, bins: List[BinCollection]
-    ) -> List[BinCollection]:
+    def _sort_bins_by_date(self, bins: List[BinCollection]) -> List[BinCollection]:
         """Sort bins by collection date, earliest first.
 
         Args:
@@ -538,6 +536,7 @@ class BinsService:
         Returns:
             Sorted list of BinCollection objects.
         """
+
         def parse_date(bin_item: BinCollection) -> datetime:
             try:
                 return datetime.strptime(bin_item.collection_date, "%Y-%m-%d")
@@ -553,7 +552,7 @@ class BinsService:
         uprn: Optional[str] = None,
     ) -> BinCollectionResponse:
         """Create a fallback response when API data is unavailable.
-        
+
         This provides a graceful degradation when the upstream API
         cannot provide data.
 
@@ -572,9 +571,9 @@ class BinsService:
             address_parts.append(postcode)
         if uprn:
             address_parts.append(f"(UPRN: {uprn})")
-        
+
         address = ", ".join(address_parts) if address_parts else "Unknown Address"
-        
+
         return BinCollectionResponse(
             address=address,
             council="City of York Council",
@@ -584,10 +583,10 @@ class BinsService:
 
 def get_bins_service(settings: Settings = None) -> BinsService:
     """Factory function to create BinsService instance.
-    
+
     Args:
         settings: Optional settings instance. If not provided, uses default settings.
-    
+
     Returns:
         BinsService instance.
     """

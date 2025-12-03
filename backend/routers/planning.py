@@ -21,13 +21,13 @@ router = APIRouter()
 
 
 def get_service(
-    settings: Annotated[Settings, Depends(get_settings)]
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> PlanningService:
     """Dependency injection for PlanningService.
-    
+
     Args:
         settings: Application settings from dependency injection.
-        
+
     Returns:
         PlanningService instance.
     """
@@ -73,16 +73,16 @@ async def get_planning(
     ] = None,
 ) -> PlanningResponse:
     """Get planning applications for a local planning authority.
-    
+
     Args:
         service: Injected PlanningService instance.
         lpa: Local Planning Authority name or identifier.
         date_from: Start date for filtering (YYYY-MM-DD).
         date_to: End date for filtering (YYYY-MM-DD).
-        
+
     Returns:
         PlanningResponse with LPA name and list of planning applications.
-        
+
     Raises:
         HTTPException: If the request is invalid or external service fails.
     """

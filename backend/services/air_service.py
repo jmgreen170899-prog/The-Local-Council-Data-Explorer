@@ -58,16 +58,16 @@ DAQI_BANDS = {
 
 def get_daqi_summary(index: int) -> str:
     """Get DAQI summary text for a given index value.
-    
+
     The UK Daily Air Quality Index ranges from 1-10:
     - 1-3: Low pollution - Enjoy your usual outdoor activities
     - 4-6: Moderate pollution - Consider reducing strenuous activities
     - 7-9: High pollution - Reduce strenuous activities outdoors
     - 10: Very High pollution - Avoid strenuous activities outdoors
-    
+
     Args:
         index: DAQI index value (1-10).
-        
+
     Returns:
         Summary text (Low, Moderate, High, or Very High).
     """
@@ -97,7 +97,9 @@ MOCK_AIR_QUALITY_DATA: Dict[str, AirQualityResponse] = {
         summary="Moderate",
         pollutants=[
             Pollutant(name="NO2", value=42.0, units="µg/m³", band="Moderate", index=3),
-            Pollutant(name="PM2.5", value=18.5, units="µg/m³", band="Moderate", index=4),
+            Pollutant(
+                name="PM2.5", value=18.5, units="µg/m³", band="Moderate", index=4
+            ),
             Pollutant(name="PM10", value=28.3, units="µg/m³", band="Low", index=2),
             Pollutant(name="O3", value=52.0, units="µg/m³", band="Low", index=2),
             Pollutant(name="SO2", value=8.0, units="µg/m³", band="Low", index=1),
@@ -144,16 +146,16 @@ POLLUTANT_NAME_MAPPING: Dict[str, str] = {
 
 class AirQualityService:
     """Service for retrieving air quality data from UK-AIR Defra API.
-    
+
     This service wraps the UK-AIR API (https://api.erg.ic.ac.uk/AirQuality)
     and transforms the response into our internal data model.
-    
+
     The UK Daily Air Quality Index (DAQI) is used to provide health advice:
     - 1-3: Low pollution
     - 4-6: Moderate pollution
     - 7-9: High pollution
     - 10: Very High pollution
-    
+
     Attributes:
         settings: Application settings instance.
         base_url: Base URL for the UK-AIR API.
@@ -163,7 +165,7 @@ class AirQualityService:
 
     def __init__(self, settings: Settings, cache: Optional[InMemoryCache] = None):
         """Initialize the air quality service.
-        
+
         Args:
             settings: Application settings instance.
             cache: Optional cache instance. If not provided, uses global cache.
@@ -181,7 +183,7 @@ class AirQualityService:
         area: Optional[str] = None,
     ) -> AirQualityResponse:
         """Retrieve air quality data for a given area.
-        
+
         This method first checks the cache for existing data. If not found,
         it fetches from the UK-AIR API and caches the result.
 
@@ -198,10 +200,10 @@ class AirQualityService:
         # Default area if not provided
         if not area:
             area = "Yorkshire & Humber"
-        
+
         # Generate cache key based on input parameters
         cache_key = self.cache.generate_key("air_quality", area=area)
-        
+
         # Check cache first
         cached = self.cache.get(cache_key)
         if cached is not None:
@@ -212,7 +214,7 @@ class AirQualityService:
             result = self._get_mock_data(area)
         else:
             result = await self._fetch_from_api(area)
-        
+
         # Cache the result with short TTL (air quality changes frequently)
         self.cache.set(cache_key, result, ttl=self.settings.CACHE_TTL_AIR_QUALITY)
         return result
@@ -253,10 +255,10 @@ class AirQualityService:
         area: Optional[str] = None,
     ) -> AirQualityResponse:
         """Fetch air quality data from UK-AIR Defra API.
-        
+
         The API endpoint format is:
         GET https://api.erg.ic.ac.uk/AirQuality/Daily/MonitoringIndex/GroupName={GroupName}/Json
-        
+
         Alternative endpoint for forecasts:
         GET https://api.erg.ic.ac.uk/AirQuality/Forecast/MonitoringIndex/GroupName={GroupName}/Json
 
@@ -271,11 +273,11 @@ class AirQualityService:
         """
         # Use "All" to get nationwide data if no specific area
         group_name = area or "All"
-        
+
         # Build the API URL for UK-AIR daily monitoring index
         # Try the daily monitoring index first
         url = f"{self.base_url}/Daily/MonitoringIndex/GroupName={group_name}/Json"
-        
+
         logger.info(f"Fetching air quality data from: {url}")
 
         try:
@@ -285,7 +287,7 @@ class AirQualityService:
                 data = response.json()
 
             return self._transform_ukair_api_response(data, area or "United Kingdom")
-            
+
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error from UK-AIR API: {e}")
             # Try fallback to forecast endpoint
@@ -298,18 +300,18 @@ class AirQualityService:
         self, area: Optional[str] = None
     ) -> AirQualityResponse:
         """Fallback to forecast endpoint if daily monitoring fails.
-        
+
         Args:
             area: The geographic area to query.
-            
+
         Returns:
             AirQualityResponse from forecast API or default fallback.
         """
         group_name = area or "All"
         url = f"{self.base_url}/Forecast/MonitoringIndex/GroupName={group_name}/Json"
-        
+
         logger.info(f"Trying forecast fallback: {url}")
-        
+
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.get(url)
@@ -317,16 +319,14 @@ class AirQualityService:
                 data = response.json()
 
             return self._transform_ukair_api_response(data, area or "United Kingdom")
-            
+
         except (httpx.HTTPStatusError, httpx.RequestError) as e:
             logger.warning(f"Forecast fallback also failed: {e}")
             return self._create_fallback_response(area or "United Kingdom")
 
-    def _transform_ukair_api_response(
-        self, data: Any, area: str
-    ) -> AirQualityResponse:
+    def _transform_ukair_api_response(self, data: Any, area: str) -> AirQualityResponse:
         """Transform UK-AIR API response into internal model.
-        
+
         The UK-AIR API returns data in the following structure:
         {
             "DailyAirQualityIndex": {
@@ -365,54 +365,54 @@ class AirQualityService:
         pollutants: List[Pollutant] = []
         max_daqi = 1
         forecast_date = date.today().isoformat()
-        
+
         # Handle different response formats
         if not isinstance(data, dict):
             logger.warning(f"Unexpected API response type: {type(data)}")
             return self._create_fallback_response(area)
-        
+
         # Parse UK-AIR API response format
         daily_data = data.get("DailyAirQualityIndex", {})
-        
+
         # Extract forecast date if available
         forecast_date = daily_data.get("@ForecastDate", forecast_date)
-        
+
         # Get local authority data
         local_authority = daily_data.get("LocalAuthority", [])
-        
+
         # Ensure it's a list
         if isinstance(local_authority, dict):
             local_authority = [local_authority]
-        
+
         if isinstance(local_authority, list) and local_authority:
             for la in local_authority:
                 if not isinstance(la, dict):
                     continue
-                    
+
                 # Get sites from this local authority
                 site = la.get("Site", [])
-                
+
                 # Ensure it's a list
                 if isinstance(site, dict):
                     site = [site]
-                
+
                 if isinstance(site, list):
                     for s in site:
                         if not isinstance(s, dict):
                             continue
-                            
+
                         # Get species (pollutant) measurements
                         species = s.get("Species", [])
-                        
+
                         # Ensure it's a list
                         if isinstance(species, dict):
                             species = [species]
-                        
+
                         if isinstance(species, list):
                             for sp in species:
                                 if not isinstance(sp, dict):
                                     continue
-                                    
+
                                 pollutant = self._parse_species(sp)
                                 if pollutant:
                                     # Track max DAQI
@@ -422,13 +422,10 @@ class AirQualityService:
 
         # Remove duplicate pollutants, keeping highest values
         unique_pollutants = self._deduplicate_pollutants(pollutants)
-        
+
         # Recalculate max_daqi from deduplicated pollutants
         if unique_pollutants:
-            max_daqi = max(
-                (p.index or 1 for p in unique_pollutants),
-                default=1
-            )
+            max_daqi = max((p.index or 1 for p in unique_pollutants), default=1)
 
         return AirQualityResponse(
             area=area,
@@ -440,7 +437,7 @@ class AirQualityService:
 
     def _parse_species(self, sp: Dict[str, Any]) -> Optional[Pollutant]:
         """Parse a single species (pollutant) from UK-AIR API response.
-        
+
         The species data has the following format:
         {
             "@SpeciesCode": "NO2",
@@ -458,14 +455,14 @@ class AirQualityService:
         try:
             # Extract species code (pollutant name)
             species_code = sp.get("@SpeciesCode", "Unknown")
-            
+
             # Get the measured value
             value_str = sp.get("@Value", "0")
             try:
                 value = float(value_str) if value_str else 0.0
             except (ValueError, TypeError):
                 value = 0.0
-            
+
             # Get DAQI index
             index_str = sp.get("@AirQualityIndex", "1")
             try:
@@ -474,10 +471,10 @@ class AirQualityService:
                 index = max(1, min(10, index))
             except (ValueError, TypeError):
                 index = 1
-            
+
             # Get quality band
             band = sp.get("@AirQualityBand", get_daqi_summary(index))
-            
+
             return Pollutant(
                 name=species_code,
                 value=value,
@@ -485,16 +482,14 @@ class AirQualityService:
                 band=band,
                 index=index,
             )
-            
+
         except Exception as e:
             logger.warning(f"Error parsing species data: {e}")
             return None
 
-    def _deduplicate_pollutants(
-        self, pollutants: List[Pollutant]
-    ) -> List[Pollutant]:
+    def _deduplicate_pollutants(self, pollutants: List[Pollutant]) -> List[Pollutant]:
         """Remove duplicate pollutants, keeping the one with highest index.
-        
+
         When multiple readings exist for the same pollutant (from different
         monitoring sites), we keep the worst reading (highest index) as a
         conservative measure.
@@ -510,18 +505,16 @@ class AirQualityService:
             existing = pollutant_map.get(p.name)
             if existing is None or (p.index or 0) > (existing.index or 0):
                 pollutant_map[p.name] = p
-        
+
         # Sort pollutants by index (worst first) for clarity
         sorted_pollutants = sorted(
-            pollutant_map.values(),
-            key=lambda x: x.index or 0,
-            reverse=True
+            pollutant_map.values(), key=lambda x: x.index or 0, reverse=True
         )
         return sorted_pollutants
 
     def _create_fallback_response(self, area: str) -> AirQualityResponse:
         """Create a fallback response when API data is unavailable.
-        
+
         This provides a graceful degradation when the upstream API
         cannot provide data.
 
@@ -542,10 +535,10 @@ class AirQualityService:
 
 def get_air_quality_service(settings: Settings = None) -> AirQualityService:
     """Factory function to create AirQualityService instance.
-    
+
     Args:
         settings: Optional settings instance. If not provided, uses default settings.
-    
+
     Returns:
         AirQualityService instance.
     """
